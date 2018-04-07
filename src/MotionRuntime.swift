@@ -32,6 +32,11 @@ import IndefiniteObservable
  */
 public final class MotionRuntime {
 
+  deinit {
+    _visualizationView?.removeFromSuperview()
+    subscriptions.forEach { $0.unsubscribe() }
+  }
+
   /**
    Creates a motion runtime instance with the provided container view.
    */
@@ -60,9 +65,32 @@ public final class MotionRuntime {
    Invokes the interaction's add method and stores the interaction instance for the lifetime of the
    runtime.
    */
-  public func add<I: Interaction>(_ interaction: I, to target: I.Target, constraints: I.Constraints? = nil) {
+  public func add<I: Interaction>(_ interaction: I, to target: I.Target, constraints: I.Constraints? = nil) where I.Target: AnyObject {
     interactions.append(interaction)
     interaction.add(to: target, withRuntime: self, constraints: constraints)
+
+    if let manipulation = interaction as? Manipulation {
+      aggregateManipulationState.observe(state: manipulation.state, withRuntime: self)
+    }
+
+    let identifier = ObjectIdentifier(target)
+    var targetInteractions = targets[identifier] ?? []
+    targetInteractions.append(interaction)
+    targets[identifier] = targetInteractions
+  }
+
+  /**
+   Returns all interactions added to the given target.
+
+   Example usage:
+
+       let draggables = runtime.interactions(ofType: Draggable.self, for: view)
+   */
+  public func interactions<I>(ofType: I.Type, for target: I.Target) -> [I] where I: Interaction, I.Target: AnyObject {
+    guard let interactions = targets[ObjectIdentifier(target)] else {
+      return []
+    }
+    return interactions.flatMap { $0 as? I }
   }
 
   /**
@@ -90,6 +118,13 @@ public final class MotionRuntime {
   }
 
   /**
+   Initiates interaction B when interaction A changes to certain state
+  */
+  public func start(_ interactionA: Togglable, when interactionB: Stateful, is state: MotionState) {
+    connect(interactionB.state.dedupe().rewrite([state: true]), to: interactionA.enabled)
+  }
+
+  /**
    Connects a stream's output to a reactive property.
 
    This method is primarily intended to be used by interactions and its presence in application
@@ -99,27 +134,52 @@ public final class MotionRuntime {
     write(stream.asStream(), to: property)
   }
 
+  /**
+   The view to which visualization elements should be registered.
+
+   This view will be added as an overlay to the runtime's container view.
+
+   Use this view like so:
+
+       runtime.add(tossable, to: view) { $0.visualize(in: runtime.visualizationView) }
+   */
+  public var visualizationView: UIView {
+    if let visualizationView = _visualizationView {
+      return visualizationView
+    }
+
+    let view = UIView(frame: .init(x: 0, y: containerView.bounds.maxY, width: containerView.bounds.width, height: 0))
+    view.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
+    view.isUserInteractionEnabled = false
+    view.backgroundColor = UIColor(white: 0, alpha: 0.1)
+    containerView.addSubview(view)
+    _visualizationView = view
+
+    return view
+  }
+  private var _visualizationView: UIView?
+
   // MARK: Reactive object storage
 
   /**
-   Returns a reactive version of the given object and caches the returned result for future access.
+   Returns a reactive version of the given object.
    */
-  public func get(_ view: UIView) -> ReactiveUIView {
-    return get(view) { .init($0, runtime: self) }
+  public func get(_ view: UIView) -> Reactive<UIView> {
+    return Reactive(view)
   }
 
   /**
-   Returns a reactive version of the given object and caches the returned result for future access.
+   Returns a reactive version of the given object.
    */
-  public func get(_ layer: CALayer) -> ReactiveCALayer {
-    return get(layer) { .init($0) }
+  public func get(_ layer: CALayer) -> Reactive<CALayer> {
+    return Reactive(layer)
   }
 
   /**
-   Returns a reactive version of the given object and caches the returned result for future access.
+   Returns a reactive version of the given object.
    */
-  public func get(_ layer: CAShapeLayer) -> ReactiveCAShapeLayer {
-    return get(layer) { .init($0) }
+  public func get(_ layer: CAShapeLayer) -> Reactive<CAShapeLayer> {
+    return Reactive(layer)
   }
 
   /**
@@ -127,6 +187,13 @@ public final class MotionRuntime {
    */
   public func get(_ scrollView: UIScrollView) -> MotionObservable<CGPoint> {
     return get(scrollView) { scrollViewToStream($0) }
+  }
+
+  /**
+   Returns a reactive version of the given object and caches the returned result for future access.
+   */
+  public func get(_ slider: UISlider) -> MotionObservable<CGFloat> {
+    return get(slider) { sliderToStream($0) }
   }
 
   /**
@@ -171,24 +238,15 @@ public final class MotionRuntime {
   }
 
   /**
-   Generates a graphviz-compatiable representation of all interactions associated with the runtime.
-
-   For quick previewing, use an online graphviz visualization tool like http://www.webgraphviz.com/
+   A Boolean stream indicating whether the runtime is currently being directly manipulated by the
+   user.
    */
-  public func asGraphviz() -> String {
-    var lines: [String] = [
-      "digraph G {",
-      "node [shape=rect]"
-    ]
-    for metadata in metadata {
-      lines.append(metadata.debugDescription)
-    }
-    lines.append("}")
-    return lines.joined(separator: "\n")
+  public var isBeingManipulated: MotionObservable<Bool> {
+    return aggregateManipulationState.asStream().rewrite([.active: true, .atRest: false])
   }
+  private let aggregateManipulationState = AggregateMotionState()
 
   private func write<O: MotionObservableConvertible, T>(_ stream: O, to property: ReactiveProperty<T>) where O.T == T {
-    metadata.append(stream.metadata.createChild(property.metadata))
     subscriptions.append(stream.subscribe(next: { property.value = $0 },
                                           coreAnimation: property.coreAnimation,
                                           visualization: { [weak self] view in
@@ -213,8 +271,8 @@ public final class MotionRuntime {
     return reactiveObject
   }
   private var reactiveObjects: [ObjectIdentifier: AnyObject] = [:]
+  private var targets: [ObjectIdentifier: [Any]] = [:]
 
-  private var metadata: [Metadata] = []
   private var subscriptions: [Subscription] = []
   private var interactions: [Any] = []
 }

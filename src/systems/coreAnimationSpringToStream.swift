@@ -22,9 +22,9 @@ import UIKit
 
  Only works with Subtractable types due to use of additive animations.
  */
-public func coreAnimation<T>(_ spring: SpringShadow<T>) -> (MotionObservable<T>) where T: Subtractable {
+public func coreAnimation<T>(_ spring: SpringShadow<T>) -> (MotionObservable<T>) {
   let initialVelocityStream = spring.initialVelocity.asStream()
-  return MotionObservable(Metadata("Core Animation Spring", args: [spring.enabled, spring.state, spring.initialValue, spring.initialVelocity, spring.destination, spring.tension, spring.friction, spring.mass, spring.suggestedDuration, spring.threshold])) { observer in
+  return MotionObservable { observer in
     var animationKeys: [String] = []
 
     var to: T?
@@ -41,8 +41,8 @@ public func coreAnimation<T>(_ spring: SpringShadow<T>) -> (MotionObservable<T>)
 
       let animation = CASpringAnimation()
 
-      animation.damping = spring.friction.value
-      animation.stiffness = spring.tension.value
+      animation.damping = spring.damping.value
+      animation.stiffness = spring.stiffness.value
       animation.mass = spring.mass.value
 
       animation.fromValue = spring.initialValue.value

@@ -14,23 +14,17 @@
  limitations under the License.
  */
 
-import XCTest
-import MaterialMotion
+import Foundation
+import UIKit
 
-class initialValueTests: XCTestCase {
+extension CGPoint: ZeroableAndSubtractable {
+}
 
-  func testInitialValueIsReceivedFirst() {
-    let property = createProperty()
+extension CGSize: ZeroableAndSubtractable {
+}
 
-    var values: [CGFloat] = []
-    let subscription = property.initialValue(10).subscribeToValue { value in
-      values.append(value)
-    }
+extension CGRect: ZeroableAndSubtractable {
+}
 
-    property.value = -10
-
-    XCTAssertEqual(values, [10, 0, -10])
-
-    subscription.unsubscribe()
-  }
+extension CGFloat: ZeroableAndSubtractable {
 }

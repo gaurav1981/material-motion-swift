@@ -24,7 +24,7 @@ extension MotionObservableConvertible {
    Emits values from upstream after the specified delay.
    */
   public func delay(by duration: CGFloat) -> MotionObservable<T> {
-    return MotionObservable(self.metadata.createChild(Metadata(#function, type: .constraint, args: [duration]))) { observer in
+    return MotionObservable { observer in
       var subscription: Subscription?
 
       subscription = self.asStream().subscribeAndForward(to: observer) { value in
@@ -41,5 +41,13 @@ extension MotionObservableConvertible {
         subscription = nil
       }
     }
+  }
+
+  /**
+   Emits values from upstream after the specified delay.
+   */
+  public func delay(by duration: DispatchTimeInterval) -> MotionObservable<T> {
+    let durationInSeconds = duration.toSeconds()
+    return self.delay(by: durationInSeconds)
   }
 }

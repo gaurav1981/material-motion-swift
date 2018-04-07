@@ -18,14 +18,14 @@ import Foundation
 import UIKit
 
 /**
- The default transition spring tension configuration.
+ The default transition spring stiffness configuration.
  */
-public let defaultTransitionSpringTension: CGFloat = 500
+public let defaultTransitionSpringStiffness: CGFloat = 1000
 
 /**
- The default transition spring friction configuration.
+ The default transition spring damping configuration.
  */
-public let defaultTransitionSpringFriction: CGFloat = 1000
+public let defaultTransitionSpringDamping: CGFloat = 500
 
 /**
  The default transition spring mass configuration.
@@ -61,7 +61,7 @@ public let defaultTransitionSpringSuggestedDuration: CGFloat = 0.5
 
  T-value constraints may be applied to this interaction.
  */
-public final class TransitionSpring<T>: Spring<T> where T: Zeroable, T: Subtractable {
+public final class TransitionSpring<T>: Spring<T> where T: ZeroableAndSubtractable {
 
   /**
    The destination when the transition is moving backward.
@@ -95,8 +95,8 @@ public final class TransitionSpring<T>: Spring<T> where T: Zeroable, T: Subtract
     super.init(threshold: threshold, system: system)
 
     // Apply Core Animation transition spring defaults.
-    friction.value = defaultTransitionSpringTension
-    tension.value = defaultTransitionSpringFriction
+    damping.value = defaultTransitionSpringDamping
+    stiffness.value = defaultTransitionSpringStiffness
     mass.value = defaultTransitionSpringMass
     suggestedDuration.value = defaultTransitionSpringSuggestedDuration
   }

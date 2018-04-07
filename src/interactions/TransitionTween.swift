@@ -57,6 +57,8 @@ public final class TransitionTween<T>: Tween<T> {
   public init(duration: CGFloat,
               forwardValues: [T],
               direction: ReactiveProperty<TransitionDirection>,
+              delayBefore: CGFloat = 0,
+              delayAfter: CGFloat = 0,
               forwardKeyPositions: [CGFloat] = [],
               system: @escaping TweenToStream<T> = coreAnimation,
               timeline: Timeline? = nil) {
@@ -68,18 +70,35 @@ public final class TransitionTween<T>: Tween<T> {
 
     self.direction = direction
 
-    self.toggledValues = direction.rewrite([.backward: backwardValues, .forward: forwardValues])
-    self.toggledKeyPositions = direction.rewrite([.backward: backwardKeyPositions, .forward: forwardKeyPositions])
+    self.toggledValues = direction.dedupe().rewrite([.backward: backwardValues, .forward: forwardValues])
+    self.toggledOffsets = direction.dedupe().rewrite([.backward: backwardKeyPositions, .forward: forwardKeyPositions])
+    self.toggledDelay = direction.dedupe().rewrite([.backward: delayAfter, .forward: delayBefore])
     super.init(duration: duration, values: values, system: system, timeline: timeline)
+  }
+
+  /**
+   Creates a transition tween.
+
+   - parameter system: Often coreAnimation. Can be another system if a system support library is available.
+   */
+  convenience public init(duration: DispatchTimeInterval,
+              forwardValues: [T],
+              direction: ReactiveProperty<TransitionDirection>,
+              forwardKeyPositions: [CGFloat] = [],
+              system: @escaping TweenToStream<T> = coreAnimation,
+              timeline: Timeline? = nil) {
+    let durationInSeconds = duration.toSeconds()
+    self.init(duration: durationInSeconds, forwardValues: forwardValues, direction: direction, forwardKeyPositions: forwardKeyPositions, system: system, timeline: timeline)
   }
 
   public override func add(to property: ReactiveProperty<T>,
                            withRuntime runtime: MotionRuntime,
                            constraints: ConstraintApplicator<T>? = nil) {
-    let unlocked = createProperty("TransitionTween.unlocked", withInitialValue: false)
-    runtime.connect(direction.rewriteTo(false), to: unlocked)
+    let unlocked = createProperty(withInitialValue: false)
+    runtime.connect(direction.dedupe().rewriteTo(false), to: unlocked)
+    runtime.connect(toggledDelay, to: delay)
     runtime.connect(toggledValues, to: values)
-    runtime.connect(toggledKeyPositions, to: keyPositions)
+    runtime.connect(toggledOffsets, to: offsets)
     super.add(to: property, withRuntime: runtime) {
       var stream = $0
       if let constraints = constraints {
@@ -87,10 +106,11 @@ public final class TransitionTween<T>: Tween<T> {
       }
       return stream.valve(openWhenTrue: unlocked)
     }
-    runtime.connect(direction.rewriteTo(true), to: unlocked)
+    runtime.connect(direction.dedupe().rewriteTo(true), to: unlocked)
   }
 
   private let direction: ReactiveProperty<TransitionDirection>
   private let toggledValues: MotionObservable<[T]>
-  private let toggledKeyPositions: MotionObservable<[CGFloat]>
+  private let toggledOffsets: MotionObservable<[CGFloat]>
+  private let toggledDelay: MotionObservable<CGFloat>
 }

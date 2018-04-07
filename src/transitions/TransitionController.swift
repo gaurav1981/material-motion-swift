@@ -23,7 +23,7 @@ extension UIViewController {
   }
 
   /**
-   A transition controller may be used to implement custom transitions.
+   A transition controller may be used to implement custom Material Motion transitions.
 
    The transition controller is lazily created upon access. If the view controller's
    transitioningDelegate is nil when the controller is created, then the controller will also be set
@@ -39,7 +39,7 @@ extension UIViewController {
       objc_setAssociatedObject(self, &AssociatedKeys.transitionController, controller, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
 
       if transitioningDelegate == nil {
-        transitioningDelegate = controller
+        transitioningDelegate = controller.transitioningDelegate
       }
 
       return controller
@@ -48,12 +48,12 @@ extension UIViewController {
 }
 
 /**
- An MDMTransitionController is the bridging object between UIKit's view controller transitioning
+ A TransitionController is the bridging object between UIKit's view controller transitioning
  APIs and Material Motion transitions.
 
  This class is not meant to be instantiated directly.
  */
-public final class TransitionController: NSObject {
+public final class TransitionController {
 
   /**
    An instance of the directorClass will be created to describe the motion for this transition
@@ -63,28 +63,113 @@ public final class TransitionController: NSObject {
 
    Must be a subclass of MDMTransition.
    */
-  public var transitionType: Transition.Type?
+  public var transition: Transition? {
+    set {
+      _transitioningDelegate.transition = newValue
 
-  public let dismisser: ViewControllerDismisser
+      if let presentationTransition = newValue as? TransitionWithPresentation,
+        let modalPresentationStyle = presentationTransition.defaultModalPresentationStyle() {
+        _transitioningDelegate.associatedViewController?.modalPresentationStyle = modalPresentationStyle
+      }
+    }
+    get { return _transitioningDelegate.transition }
+  }
+
+  /**
+   The presentation controller to be used during this transition.
+
+   Will be read from and cached when the view controller is first presented. Changes made to this
+   property after presentation will be ignored.
+   */
+  public var presentationController: UIPresentationController? {
+    set { _transitioningDelegate.presentationController = newValue }
+    get { return _transitioningDelegate.presentationController }
+  }
+
+  /**
+   Start a dismiss transition when the given gesture recognizer enters its began or recognized
+   state.
+
+   The provided gesture recognizer will be made available to the transition instance via the
+   TransitionContext's `gestureRecognizers` property.
+   */
+  public func dismissWhenGestureRecognizerBegins(_ gestureRecognizer: UIGestureRecognizer) {
+    _transitioningDelegate.dismisser.dismissWhenGestureRecognizerBegins(gestureRecognizer)
+  }
+
+  /**
+   Will not allow the provided gesture recognizer to recognize simultaneously with other gesture
+   recognizers.
+
+   This method assumes that the provided gesture recognizer's delegate has been assigned to the
+   transition controller's gesture delegate.
+   */
+  public func disableSimultaneousRecognition(of gestureRecognizer: UIGestureRecognizer) {
+    _transitioningDelegate.dismisser.disableSimultaneousRecognition(of: gestureRecognizer)
+  }
+
+  /**
+   Returns a gesture recognizer delegate that will allow the gesture recognizer to begin only if the
+   provided scroll view is scrolled to the top of its content.
+
+   The returned delegate implements gestureRecognizerShouldBegin.
+   */
+  public func topEdgeDismisserDelegate(for scrollView: UIScrollView) -> UIGestureRecognizerDelegate {
+    return _transitioningDelegate.dismisser.topEdgeDismisserDelegate(for: scrollView)
+  }
+
+  /**
+   The set of gesture recognizers that will be provided to the transition via the TransitionContext
+   instance.
+   */
+  public var gestureRecognizers: Set<UIGestureRecognizer> {
+    set { _transitioningDelegate.gestureDelegate.gestureRecognizers = newValue }
+    get { return _transitioningDelegate.gestureDelegate.gestureRecognizers }
+  }
+
+  /**
+   The transitioning delegate managed by this controller.
+
+   This object can be assigned to the view controller's transitioningDelegate. This is done
+   automatically when a view controller's `transitionController` is first accessed.
+   */
+  public var transitioningDelegate: UIViewControllerTransitioningDelegate {
+    return _transitioningDelegate
+  }
+
+  /**
+   The gesture recognizer delegate managed by this controller.
+   */
+  public var gestureDelegate: UIGestureRecognizerDelegate {
+    return _transitioningDelegate.gestureDelegate
+  }
 
   init(viewController: UIViewController) {
+    _transitioningDelegate = TransitioningDelegate(viewController: viewController)
+  }
+
+  fileprivate let _transitioningDelegate: TransitioningDelegate
+}
+
+private final class TransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
+  init(viewController: UIViewController) {
     self.associatedViewController = viewController
-    self.dismisser = ViewControllerDismisser()
+
+    self.dismisser = ViewControllerDismisser(gestureDelegate: self.gestureDelegate)
 
     super.init()
 
     self.dismisser.delegate = self
   }
 
-  fileprivate var ctx: TransitionContext?
+  var ctx: TransitionContext?
+  var transition: Transition?
 
-  fileprivate weak var associatedViewController: UIViewController?
-}
+  let dismisser: ViewControllerDismisser
+  let gestureDelegate = GestureDelegate()
+  var presentationController: UIPresentationController?
 
-extension TransitionController {
-  func isInteractive() -> Bool {
-    return dismisser.gestureRecognizers.count > 0
-  }
+  weak var associatedViewController: UIViewController?
 
   func prepareForTransition(withSource: UIViewController,
                             back: UIViewController,
@@ -97,55 +182,25 @@ extension TransitionController {
     }
     assert(ctx == nil, "A transition is already active.")
 
-    if let transitionType = transitionType {
-      if direction == .forward, let selfDismissingDirector = transitionType as? SelfDismissingTransition.Type {
+    if let transition = transition {
+      if direction == .forward, let selfDismissingDirector = transition as? SelfDismissingTransition {
         selfDismissingDirector.willPresent(fore: fore, dismisser: dismisser)
       }
 
-      ctx = TransitionContext(transitionType: transitionType,
+      ctx = TransitionContext(transition: transition,
                               direction: direction,
                               back: back,
                               fore: fore,
-                              dismisser: dismisser)
+                              gestureRecognizers: gestureDelegate.gestureRecognizers,
+                              presentationController: presentationController)
       ctx?.delegate = self
     }
   }
-}
 
-extension TransitionController: ViewControllerDismisserDelegate {
-  func dismiss() {
-    guard let associatedViewController = associatedViewController else {
-      return
-    }
-
-    if associatedViewController.presentingViewController == nil {
-      return
-    }
-
-    if associatedViewController.isBeingDismissed || associatedViewController.isBeingPresented {
-      return
-    }
-
-    associatedViewController.dismiss(animated: true)
-  }
-}
-
-extension TransitionController: TransitionDelegate {
-  func transitionDidComplete(withContext ctx: TransitionContext) {
-    if ctx === self.ctx {
-      self.ctx = nil
-    }
-  }
-}
-
-extension TransitionController: UIViewControllerTransitioningDelegate {
   public func animationController(forPresented presented: UIViewController,
                                   presenting: UIViewController,
                                   source: UIViewController) -> UIViewControllerAnimatedTransitioning? {
-    prepareForTransition(withSource: source,
-                         back: presenting,
-                         fore: presented,
-                         direction: .forward)
+    prepareForTransition(withSource: source, back: presenting, fore: presented, direction: .forward)
     return ctx
   }
 
@@ -182,5 +237,48 @@ extension TransitionController: UIViewControllerTransitioningDelegate {
       return ctx
     }
     return nil
+  }
+
+  func isInteractive() -> Bool {
+    return gestureDelegate.gestureRecognizers.filter { $0.state == .began || $0.state == .changed }.count > 0
+  }
+
+  func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
+    guard let transitionWithPresentation = transition as? TransitionWithPresentation else {
+      return nil
+    }
+    if let presentationController = presentationController {
+      return presentationController
+    }
+    presentationController = transitionWithPresentation.presentationController(forPresented: presented,
+                                                                               presenting: presenting,
+                                                                               source: source)
+    return presentationController
+  }
+}
+
+extension TransitioningDelegate: ViewControllerDismisserDelegate {
+  func dismiss() {
+    guard let associatedViewController = associatedViewController else {
+      return
+    }
+
+    if associatedViewController.presentingViewController == nil {
+      return
+    }
+
+    if associatedViewController.isBeingDismissed || associatedViewController.isBeingPresented {
+      return
+    }
+
+    associatedViewController.dismiss(animated: true)
+  }
+}
+
+extension TransitioningDelegate: TransitionDelegate {
+  func transitionDidComplete(withContext ctx: TransitionContext) {
+    if ctx === self.ctx {
+      self.ctx = nil
+    }
   }
 }

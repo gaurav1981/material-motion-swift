@@ -14,20 +14,20 @@
  limitations under the License.
  */
 
-import Foundation
+import UIKit
 
-extension MotionObservableConvertible {
-
+extension MotionObservableConvertible where T: Equatable {
   /**
-   Emits the provided value and then subscribes upstream and emits all subsequent values with no
-   modification.
-
-   Helpful for priming a stream with an initial value.
+   Ignores values from upstream until the expected value is received, at which point it emits
+   that value and all further values without modification.
    */
-  public func initialValue(_ value: T) -> MotionObservable<T> {
-    return MotionObservable(self.metadata.createChild(Metadata(#function, type: .constraint, args: [value]))) { observer in
-      observer.next(value)
-      return self.asStream().subscribeAndForward(to: observer).unsubscribe
+  public func ignoreUntil(_ expected: T) -> MotionObservable<T> {
+    var shouldSend = false
+    return _filter() { value in
+      if value == expected {
+        shouldSend = true
+      }
+      return shouldSend
     }
   }
 }

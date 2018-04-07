@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07EB59021EBCEF8F0045ABAE /* ignoreUntilTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07EB59001EBCEF3D0045ABAE /* ignoreUntilTest.swift */; };
 		19940C71B8C97EDA48552251 /* Pods_MaterialMotionCatalog.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 16DDCA39C49FF5C091B2AF6C /* Pods_MaterialMotionCatalog.framework */; };
 		6605044E1E83146C009EDB8A /* distanceFromTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6605044D1E83146C009EDB8A /* distanceFromTests.swift */; };
 		66090B841E03715F00B1D598 /* PropertyObservation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66090B831E03715F00B1D598 /* PropertyObservation.swift */; };
@@ -63,7 +64,7 @@
 		6695129B1E830AE500D8868D /* lowerBoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6695129A1E830AE500D8868D /* lowerBoundTests.swift */; };
 		6695129D1E830B6E00D8868D /* upperBoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6695129C1E830B6E00D8868D /* upperBoundTests.swift */; };
 		6695129F1E830C0800D8868D /* valveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6695129E1E830C0800D8868D /* valveTests.swift */; };
-		669512A11E830E1900D8868D /* initialValueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669512A01E830E1900D8868D /* initialValueTests.swift */; };
+		669512A11E830E1900D8868D /* startWithTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 669512A01E830E1900D8868D /* startWithTests.swift */; };
 		66BD3CCB1E8046AD00AA413C /* MaterialExpansionExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66BD3CCA1E8046AD00AA413C /* MaterialExpansionExample.swift */; };
 		66DDFD0D1E71F0F100AA46B7 /* DraggableExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DDFD0C1E71F0F100AA46B7 /* DraggableExample.swift */; };
 		66DDFD121E71F39700AA46B7 /* ExampleViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66DDFD111E71F39700AA46B7 /* ExampleViews.swift */; };
@@ -87,6 +88,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		07EB59001EBCEF3D0045ABAE /* ignoreUntilTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ignoreUntilTest.swift; sourceTree = "<group>"; };
 		1486CD16AAF554D1E8B5BBB3 /* Pods-UnitTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnitTests.debug.xcconfig"; path = "../../../Pods/Target Support Files/Pods-UnitTests/Pods-UnitTests.debug.xcconfig"; sourceTree = "<group>"; };
 		16DDCA39C49FF5C091B2AF6C /* Pods_MaterialMotionCatalog.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MaterialMotionCatalog.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F2DC52F25787C67CDBB6189 /* Pods-UnitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnitTests.release.xcconfig"; path = "../../../Pods/Target Support Files/Pods-UnitTests/Pods-UnitTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -150,7 +152,7 @@
 		6695129A1E830AE500D8868D /* lowerBoundTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lowerBoundTests.swift; sourceTree = "<group>"; };
 		6695129C1E830B6E00D8868D /* upperBoundTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = upperBoundTests.swift; sourceTree = "<group>"; };
 		6695129E1E830C0800D8868D /* valveTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = valveTests.swift; sourceTree = "<group>"; };
-		669512A01E830E1900D8868D /* initialValueTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = initialValueTests.swift; sourceTree = "<group>"; };
+		669512A01E830E1900D8868D /* startWithTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = startWithTests.swift; sourceTree = "<group>"; };
 		66BD3CCA1E8046AD00AA413C /* MaterialExpansionExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MaterialExpansionExample.swift; path = ../../MaterialExpansionExample.swift; sourceTree = "<group>"; };
 		66DDFD0C1E71F0F100AA46B7 /* DraggableExample.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = DraggableExample.swift; path = ../../DraggableExample.swift; sourceTree = "<group>"; };
 		66DDFD111E71F39700AA46B7 /* ExampleViews.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExampleViews.swift; sourceTree = "<group>"; };
@@ -276,7 +278,7 @@
 				669512921E8301D100D8868D /* dedupeTests.swift */,
 				669512961E8305AC00D8868D /* delayTests.swift */,
 				6605044D1E83146C009EDB8A /* distanceFromTests.swift */,
-				669512A01E830E1900D8868D /* initialValueTests.swift */,
+				07EB59001EBCEF3D0045ABAE /* ignoreUntilTest.swift */,
 				66F2C3C81E83245800DD9728 /* invertedTests.swift */,
 				6695129A1E830AE500D8868D /* lowerBoundTests.swift */,
 				6613A9DA1E832779004A3699 /* mergeTests.swift */,
@@ -288,6 +290,7 @@
 				6613A9EC1E841C04004A3699 /* rubberBandedTests.swift */,
 				6613A9EA1E84188D004A3699 /* scaledByTests.swift */,
 				6695128E1E82ED0900D8868D /* slopTests.swift */,
+				669512A01E830E1900D8868D /* startWithTests.swift */,
 				6613A9EE1E8420CE004A3699 /* thresholdTests.swift */,
 				6613A9F01E84214F004A3699 /* thresholdRangeTests.swift */,
 				6695129C1E830B6E00D8868D /* upperBoundTests.swift */,
@@ -558,9 +561,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/../../../Pods/Target Support Files/Pods-MaterialMotionCatalog/Pods-MaterialMotionCatalog-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/CatalogByConvention/CatalogByConvention.framework",
+				"${BUILT_PRODUCTS_DIR}/IndefiniteObservable/IndefiniteObservable.framework",
+				"${BUILT_PRODUCTS_DIR}/MaterialMotion/MaterialMotion.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/CatalogByConvention.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IndefiniteObservable.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MaterialMotion.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -573,9 +583,14 @@
 			files = (
 			);
 			inputPaths = (
+				"${SRCROOT}/../../../Pods/Target Support Files/Pods-UnitTests/Pods-UnitTests-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/IndefiniteObservable/IndefiniteObservable.framework",
+				"${BUILT_PRODUCTS_DIR}/MaterialMotion/MaterialMotion.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/IndefiniteObservable.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MaterialMotion.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -588,13 +603,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UnitTests-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 		FF0DFE3F30076BF4A0E6EC6C /* [CP] Check Pods Manifest.lock */ = {
@@ -603,13 +621,16 @@
 			files = (
 			);
 			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
 			);
 			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-MaterialMotionCatalog-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -653,6 +674,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				07EB59021EBCEF8F0045ABAE /* ignoreUntilTest.swift in Sources */,
 				6613A9F51E842FF5004A3699 /* yLockedToTests.swift in Sources */,
 				669512891E82E8CB00D8868D /* _rememberTests.swift in Sources */,
 				669512741E82E68900D8868D /* SubtractableTests.swift in Sources */,
@@ -668,7 +690,7 @@
 				6613A9F31E842F8B004A3699 /* xLockedToTests.swift in Sources */,
 				6613A9E71E84170B004A3699 /* normalizedByTests.swift in Sources */,
 				6613A9EB1E84188D004A3699 /* scaledByTests.swift in Sources */,
-				669512A11E830E1900D8868D /* initialValueTests.swift in Sources */,
+				669512A11E830E1900D8868D /* startWithTests.swift in Sources */,
 				669512871E82E8CB00D8868D /* _mapTests.swift in Sources */,
 				6613A9EF1E8420CE004A3699 /* thresholdTests.swift in Sources */,
 				6695128B1E82E8CB00D8868D /* yTests.swift in Sources */,

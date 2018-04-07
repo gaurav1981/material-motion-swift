@@ -31,7 +31,7 @@ import UIKit
  delegate associated with it and the relevant delegate methods implemented to support simultaneous
  recognition that doesn't conflict with the other gesture recognizers.
  */
-public final class DirectlyManipulable: NSObject, Interaction, Stateful {
+public final class DirectlyManipulable: NSObject, Interaction, Togglable, Stateful {
   /**
    The interaction governing drag behaviors.
    */
@@ -63,14 +63,19 @@ public final class DirectlyManipulable: NSObject, Interaction, Stateful {
   public func add(to view: UIView, withRuntime runtime: MotionRuntime, constraints: NoConstraints) {
     for gestureRecognizer in [draggable.nextGestureRecognizer,
                               rotatable.nextGestureRecognizer,
-                              scalable.nextGestureRecognizer] {
-                                if gestureRecognizer.delegate == nil {
-                                  gestureRecognizer.delegate = self
+                              scalable.nextGestureRecognizer] as [UIGestureRecognizer?] {
+                                if gestureRecognizer?.delegate == nil {
+                                  gestureRecognizer?.delegate = self
                                 }
     }
 
-    let adjustsAnchorPoint = AdjustsAnchorPoint(gestureRecognizers: [rotatable.nextGestureRecognizer,
-                                                                     scalable.nextGestureRecognizer])
+    runtime.connect(enabled, to: draggable.enabled)
+    runtime.connect(enabled, to: rotatable.enabled)
+    runtime.connect(enabled, to: scalable.enabled)
+
+    let gestures: [UIGestureRecognizer?] = [rotatable.nextGestureRecognizer, scalable.nextGestureRecognizer]
+    let anchorPointRecognizers = gestures.flatMap { $0 }
+    let adjustsAnchorPoint = AdjustsAnchorPoint(gestureRecognizers: anchorPointRecognizers)
     runtime.add(adjustsAnchorPoint, to: view)
 
     aggregateState.observe(state: draggable.state, withRuntime: runtime)
@@ -88,6 +93,8 @@ public final class DirectlyManipulable: NSObject, Interaction, Stateful {
   public var state: MotionObservable<MotionState> {
     return aggregateState.asStream()
   }
+
+  public var enabled = createProperty(withInitialValue: true)
 
   let aggregateState = AggregateMotionState()
 }
